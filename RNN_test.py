@@ -105,3 +105,7 @@ def __main__():
         bar.update(epoch + 1)
 
         display.clear_output(wait=True)
+
+
+if __name__ == "__main__":
+    __main__()
