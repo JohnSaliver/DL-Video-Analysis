@@ -35,7 +35,6 @@ class RNN_classifier(nn.Module):
         for t in range(self.seqSize):
             H = torch.reshape(Ha[:, t - 1].clone(), (batchSize, self.H_Size))
             Rt = self.f(self.R(H))
-            print(In[:, t].device, Rt.device)
             Qt = self.f(self.Q(torch.cat((In[:, t], Rt), 1)))
             for a, Alpha in enumerate(self.A) :
                 Ha[:, t, a] = Alpha * Ha[:, t - 1, a].clone() + (1 - Alpha) * Qt

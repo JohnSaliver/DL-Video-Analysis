@@ -52,15 +52,15 @@ class ShrecDataset:
         for i in range(len(Ground_truth)):
             Target[i, Ground_truth[i]] = 1
 
-        dataSize, seqSize, inputSize = Data.shape
-        outputSize = Target.shape[1]
-        trainSize = int(dataSize * 0.9)
+        self.dataSize, self.seqSize, self.inputSize = Data.shape
+        self.outputSize = Target.shape[1]
+        self.trainSize = int(self.dataSize * 0.9)
 
-        ind_train = np.random.choice(dataSize, trainSize, replace = False)
+        ind_train = np.random.choice(self.dataSize, self.trainSize, replace = False)
         train_data = torch.from_numpy(Data[ind_train])
         train_target = torch.from_numpy(Target[ind_train])
 
-        ind_test = np.delete(np.arange(dataSize), ind_train)
+        ind_test = np.delete(np.arange(self.dataSize), ind_train)
         test_data = torch.from_numpy(np.array(Data[ind_test]))
         test_target = Target[ind_test]
 

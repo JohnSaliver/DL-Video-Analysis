@@ -27,6 +27,7 @@ def __main__():
 
     dataset = ShrecDataset()
     train_data, train_target, test_data, test_target = dataset.build()
+    print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -71,7 +72,7 @@ def __main__():
         lossHistory.append(loss.to("cpu"))
 
         test_output = model.forward(test_data.float().to(device)).detach().numpy()
-        test_Score.append(np.mean(np.argmax(test_output.to("cpu"), axis=1) == np.argmax(test_target, axis=1))*100)
+        test_Score.append(np.mean(np.argmax(test_output, axis=1) == np.argmax(test_target, axis=1))*100)
 
         if (len(test_Score) - 1) % saving == 0 :
             path = adresse + '/{}.pt'.format(len(test_Score) - 1)
@@ -92,7 +93,7 @@ def __main__():
             axs[0].set_title('Loss')
             axs[0].set_xlabel('Epoch')
             axs[0].set_ylabel('Loss')
-
+            
             axs[1].plot(test_Score)
             axs[1].set_title('Réussite du set de test')
             axs[1].set_xlabel('Epoch')
@@ -103,8 +104,6 @@ def __main__():
 
         torch.cuda.empty_cache()
         bar.update(epoch + 1)
-
-        display.clear_output(wait=True)
 
 
 if __name__ == "__main__":
