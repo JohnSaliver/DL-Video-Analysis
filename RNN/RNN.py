@@ -7,7 +7,7 @@ class RNN_classifier(nn.Module):
         
         self.f = nn.Tanh().to(device) # Hyperparameter 
         self.f_out = nn.Softmax(dim = 1).to(device) # nn.Sigmoid() # Hyperparameter 
-
+        self.device = device
         self.inputSize = inputSize
         self.R_Size = 100 # Hyperparameter
         self.Q_Size = 100 # Hyperparameter
@@ -29,8 +29,8 @@ class RNN_classifier(nn.Module):
 
     def forward(self, In):
         batchSize = In.shape[0]
-        Out = torch.zeros((batchSize, self.seqSize, self.O_Size))
-        Ha = torch.zeros((batchSize, self.seqSize, len(self.A), self.Q_Size))
+        Out = torch.zeros((batchSize, self.seqSize, self.O_Size), device=self.device)
+        Ha = torch.zeros((batchSize, self.seqSize, len(self.A), self.Q_Size), device=self.device)
 
         for t in range(self.seqSize):
             H = torch.reshape(Ha[:, t - 1].clone(), (batchSize, self.H_Size))

@@ -54,6 +54,7 @@ def __main__():
     affichage = 5
     moyennage = 10
     saving = 10
+
     bar = progressbar.ProgressBar(maxval=epochs)
     bar.start()
     bar.update(0)
@@ -61,8 +62,11 @@ def __main__():
     for epoch in range(epochs):
 
         batch = np.random.choice(dataset.trainSize, batchSize)
-        output = model.forward(train_data[batch].float().to(device))
-        loss = model.loss(output, train_target[batch].float())
+        x = train_data[batch].to(device)
+        
+        output = model.forward(x.float())
+        y = train_target[batch].to(device)
+        loss = model.loss(output, y.float())
         model.zero_grad()
         loss.backward()
         optimizer.step()
@@ -71,7 +75,7 @@ def __main__():
         target.append(train_target[batch].to("cpu"))
         lossHistory.append(loss.to("cpu"))
 
-        test_output = model.forward(test_data.float().to(device)).detach().numpy()
+        test_output = model.forward(test_data.float().to(device)).to("cpu").detach().numpy()
         test_Score.append(np.mean(np.argmax(test_output, axis=1) == np.argmax(test_target, axis=1))*100)
 
         if (len(test_Score) - 1) % saving == 0 :
