@@ -99,7 +99,7 @@ def __main__():
             axs[0].set_ylabel('Loss')
             
             axs[1].plot(test_Score)
-            axs[1].set_title('Réussite du set de test')
+            axs[1].set_title('Reussite du set de test')
             axs[1].set_xlabel('Epoch')
             axs[1].set_ylabel('Score  (%)')
             plt.grid(True)
