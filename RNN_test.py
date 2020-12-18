@@ -47,7 +47,7 @@ def __main__():
     adresse = './RNN/checkpoints'
 
     batchSize = 100
-    learningRate = 0.0001
+    learningRate = 0.0001 
     epochs = 100
     optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 
