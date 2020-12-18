@@ -1,6 +1,6 @@
 {
-    "jupyter.jupyterServerType": "remote",
-    "python.pythonPath": "C:\\Users\\pizza\\anaconda3\\python.exe",
+    "jupyter.jupyterServerType": "local",
+    "python.pythonPath": "C:\\Users\\Mario\\anaconda3\\python.exe",
     "code-runner.executorMap": {
         "python": "$pythonPath -u $fullFileName",
     },
