@@ -33,7 +33,7 @@ class relational_network(nn.Module):
             else:
                 emb_support[lb] = [self.embdder([im])]
         for lb in emb_support.keys(): # we average the support embeddings
-            emb_support[lb] = torch.sum(emb_support[lb], keepdim=True)/len(emb_support[lb])
+            emb_support[lb] = torch.sum(emb_support[lb], dim=0)/len(emb_support[lb])
 
         self.train()
         losses = []
