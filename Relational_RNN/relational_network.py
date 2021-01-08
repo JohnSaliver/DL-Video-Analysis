@@ -61,7 +61,7 @@ class RelationalNetwork(nn.Module):
 
         # Same as in train, we build the support set embeddings
         emb_support = {} #label to embedded representative
-        for im, lb in sample:
+        for im, lb in support:
             if lb in emb_support.keys():
                 emb_support[lb] += [self.embdder([im])]
             else:
@@ -74,7 +74,7 @@ class RelationalNetwork(nn.Module):
         for Im in test:
             similarities = []
             for lb in enumerate(emb_support.keys()):
-                similarities[lb] = self.forward(qIm, emb_support[lb])
+                similarities[lb] = self.forward(Im, emb_support[lb])
             pred = emb_support.keys()[np.argmax(similarities)]
             test_predictions.append(pred)
         return test_predictions # one predicted label for every image
