@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import numpy as np
 
-class relational_network(nn.Module):
+class RelationalNetwork(nn.Module):
     def __init__(self, embedder, embedding_size):
         super().__init__()
         self.embdder = embedder
@@ -20,7 +20,7 @@ class relational_network(nn.Module):
     def forward(self, inp, support):
         emb = self.embedder(inp)
         emb = torch.cat(support, emb).reshape(inp.shape[0], 2*self.embedding_size)
-        
+
         return self.simi(emb)
     def trainOnSQ(self, sample, query, optim):
         # Sample : [(im, lab), ...]
