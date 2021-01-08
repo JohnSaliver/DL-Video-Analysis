@@ -40,7 +40,7 @@ class relational_network(nn.Module):
         for qIm, y in query:
             similarities = torch.zeros(len(emb_support.keys()))
             targets = torch.zeros(len(emb_support.keys()))
-            model.zero_grad()
+            self.zero_grad()
             
             for ix, lb in enumerate(emb_support.keys()):
                 similarities[ix] = self.forward(qIm, emb_support[lb])
