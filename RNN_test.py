@@ -60,55 +60,7 @@ def __main__():
     bar.update(0)
 
     for epoch in range(epochs):
-
-        batch = np.random.choice(dataset.trainSize, batchSize)
-        x = train_data[batch].to(device)
-        
-        output = model.forward(x.float())
-        y = train_target[batch].to(device)
-        loss = model.loss(output, y.float())
-        model.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        outputs.append(output.to("cpu"))
-        target.append(train_target[batch].to("cpu"))
-        lossHistory.append(loss.to("cpu"))
-
-        test_output = model.forward(test_data.float().to(device)).to("cpu").detach().numpy()
-        test_Score.append(np.mean(np.argmax(test_output, axis=1) == np.argmax(test_target, axis=1))*100)
-
-        if (len(test_Score) - 1) % saving == 0 :
-            path = adresse + '/{}.pt'.format(len(test_Score) - 1)
-            torch.save({'epoch': len(test_Score) - 1,
-                        'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': optimizer.state_dict(),
-                        'loss': loss,
-                        'test_Score': test_Score[-1]}, path)
-                        
-        if (epoch + 1) % affichage == 0 :
-            display.clear_output(wait=True)
-            plt.clf()
-
-            fig, axs = plt.subplots(2, 1, figsize=(16, 18))
-            axs[0].plot(lossHistory)
-            # axs[0].plot(np.convolve(lossHistory, np.ones(moyennage)/moyennage)[moyennage - 1 : - moyennage + 1])
-            # axs[0].legend(['loss', 'loss moyen'])
-            axs[0].set_title('Loss')
-            axs[0].set_xlabel('Epoch')
-            axs[0].set_ylabel('Loss')
-            
-            axs[1].plot(test_Score)
-            axs[1].set_title('Reussite du set de test')
-            axs[1].set_xlabel('Epoch')
-            axs[1].set_ylabel('Score  (%)')
-            plt.grid(True)
-            
-            display.display(plt.gcf())
-
-        torch.cuda.empty_cache()
-        bar.update(epoch + 1)
-
+        #How to do this is now the issue
 
 if __name__ == "__main__":
     __main__()

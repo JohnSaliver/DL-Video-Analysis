@@ -22,7 +22,7 @@ class RelationalNetwork(nn.Module):
         emb = torch.cat(support, emb).reshape(inp.shape[0], 2*self.embedding_size)
 
         return self.simi(emb)
-    def trainOnSQ(self, sample, query, optim):
+    def trainSQ(self, sample, query, optim):
         # Sample : [(im, lab), ...]
         # Query : [(im, lab), ...]
 
@@ -33,7 +33,7 @@ class RelationalNetwork(nn.Module):
                 emb_support[lb] += [self.embdder([im])]
             else:
                 emb_support[lb] = [self.embdder([im])]
-        for lb in emb_support.keys(): # we average the support embeddings
+        for lb in emb_support.keys(): # we average the sample embeddings
             emb_support[lb] = torch.sum(emb_support[lb], dim=0)/len(emb_support[lb])
 
         self.train()
@@ -54,3 +54,27 @@ class RelationalNetwork(nn.Module):
 
             losses.append(loss.item())
         return np.mean(losses)
+
+    def testST(self, support, test):
+        # Support : [(im, lab), ...]
+        # Test : [im, ...]
+
+        # Same as in train, we build the support set embeddings
+        emb_support = {} #label to embedded representative
+        for im, lb in sample:
+            if lb in emb_support.keys():
+                emb_support[lb] += [self.embdder([im])]
+            else:
+                emb_support[lb] = [self.embdder([im])]
+        for lb in emb_support.keys(): # we average the support embeddings
+            emb_support[lb] = torch.sum(emb_support[lb], dim=0)/len(emb_support[lb])
+
+        self.eval()
+        test_predictions = []
+        for Im in test:
+            similarities = []
+            for lb in enumerate(emb_support.keys()):
+                similarities[lb] = self.forward(qIm, emb_support[lb])
+            pred = emb_support.keys()[np.argmax(similarities)]
+            test_predictions.append(pred)
+        return test_predictions # one predicted label for every image
