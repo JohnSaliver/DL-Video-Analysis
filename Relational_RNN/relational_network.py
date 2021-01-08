@@ -74,7 +74,7 @@ class RelationalNetwork(nn.Module):
         for Im in test:
             similarities = []
             for lb in enumerate(emb_support.keys()):
-                similarities[lb] = self.forward(Im, emb_support[lb])
+                similarities.append(self.forward(Im, emb_support[lb]))
             pred = emb_support.keys()[np.argmax(similarities)]
             test_predictions.append(pred)
         return test_predictions # one predicted label for every image
