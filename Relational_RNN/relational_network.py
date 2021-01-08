@@ -20,7 +20,8 @@ class relational_network(nn.Module):
     def forward(self, inp, support):
         emb = self.embedder(inp)
         emb = torch.cat(support, emb).reshape(inp.shape[0], 2*self.embedding_size)
-        similarity = self.simi(emb)
+        
+        return self.simi(emb)
     def trainOnSQ(self, sample, query, optim):
         # Sample : [(im, lab), ...]
         # Query : [(im, lab), ...]
