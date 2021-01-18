@@ -63,8 +63,21 @@ def __main__():
     bar.update(0)
 
     for epoch in range(epochs):
-# How to do this is now the issue
+        # How to do this is now the issue
+        batch = np.random.choice(dataset.trainSize, batchSize)
+        ref_im_ix = batch[-1]
+        batch = batch[:-1]
+        ref_im, ref_label = train_data[ref_im_ix], train_target[ref_im_ix]
 
+        
+        output = relNet(train_data[batch], ref_im)
+        y = torch.Tensor(ref_label == train_target[batch], dtype=torch.float32)
+        loss = relNet.loss(output, y)
+        relNet.zero_grad()
+        loss.backward()
+        optimizer.step()
+        print(f"epoch {epoch}, reference {ref_label}, loss {loss.item()}")
 
+        
 if __name__ == "__main__":
     __main__()

@@ -59,7 +59,7 @@ def __main__():
     bar.start()
     bar.update(0)
 
-    for epoch in range(epochs):
+    for epoch in range(epochs):""
 
         batch = np.random.choice(dataset.trainSize, batchSize)
         x = train_data[batch].to(device)

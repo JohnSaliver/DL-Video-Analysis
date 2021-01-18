@@ -17,6 +17,7 @@ class RelationalNetwork(nn.Module):
                 nn.Linear(64, 1), nn.Sigmoid(),
             ]
         )
+        self.loss = nn.BCELoss()
     def forward(self, inp, support):
         emb = self.embedder(inp)
         emb = torch.cat(support, emb).reshape(inp.shape[0], 2*self.embedding_size)
