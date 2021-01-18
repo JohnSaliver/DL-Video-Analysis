@@ -5,23 +5,22 @@ import numpy as np
 class RelationalNetwork(nn.Module):
     def __init__(self, embedder, embedding_size):
         super().__init__()
-        self.embdder = embedder
+        self.embedder = embedder
         self.embedding_size = embedding_size
 
         self.simi = nn.Sequential(
-            [
                 nn.Linear(2*embedding_size, 512), nn.ReLU(),
                 nn.Linear(512, 256), nn.ReLU(),
                 nn.Linear(256, 128), nn.ReLU(),
                 nn.Linear(128, 64), nn.ReLU(),
-                nn.Linear(64, 1), nn.Sigmoid(),
-            ]
+                nn.Linear(64, 1), nn.Sigmoid()
         )
         self.loss = nn.BCELoss()
     def forward(self, inp, support):
         emb = self.embedder(inp)
-        emb = torch.cat(support, emb).reshape(inp.shape[0], 2*self.embedding_size)
-
+        support = support.expand((99, -1))
+        emb = torch.cat([support, emb], 1)
+        emb = emb.reshape(inp.shape[0], 2*self.embedding_size)
         return self.simi(emb)
     def trainSQ(self, sample, query, optim):
         # Sample : [(im, lab), ...]
@@ -31,9 +30,9 @@ class RelationalNetwork(nn.Module):
         emb_support = {} #label to embedded representative
         for im, lb in sample:
             if lb in emb_support.keys():
-                emb_support[lb] += [self.embdder([im])]
+                emb_support[lb] += [self.embedder([im])]
             else:
-                emb_support[lb] = [self.embdder([im])]
+                emb_support[lb] = [self.embedder([im])]
         for lb in emb_support.keys(): # we average the sample embeddings
             emb_support[lb] = torch.sum(emb_support[lb], dim=0)/len(emb_support[lb])
 

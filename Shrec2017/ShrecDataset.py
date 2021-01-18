@@ -26,7 +26,7 @@ class ShrecDataset:
         else:
             return False, None
 
-    def build(self):
+    def build(self, one_hot=True):
         Ground_truth = []
         X = []
         for idx_gesture in range(14):
@@ -47,10 +47,12 @@ class ShrecDataset:
         Data = np.zeros((len(X), max, X[0].shape[1]))
         for i in range(len(X)):
             Data[i, :X[i].shape[0], :] = np.reshape(X[i], (X[i].shape[0], X[i].shape[1]), order = 'F')
-
-        Target = np.zeros((len(Ground_truth), 14))
-        for i in range(len(Ground_truth)):
-            Target[i, Ground_truth[i]] = 1
+        if one_hot:
+            Target = np.zeros((len(Ground_truth), 14))
+            for i in range(len(Ground_truth)):
+                Target[i, Ground_truth[i]] = 1
+        else:
+            Target = np.array(Ground_truth).reshape([len(Ground_truth), 1])
 
         self.dataSize, self.seqSize, self.inputSize = Data.shape
         self.outputSize = Target.shape[1]

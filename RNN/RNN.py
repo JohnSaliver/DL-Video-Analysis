@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch import dtype, nn
 
 class RNN_classifier(nn.Module):
     def __init__(self, inputSize, seqSize, outputSize, device="cpu"):

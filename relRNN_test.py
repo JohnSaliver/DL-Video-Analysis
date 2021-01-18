@@ -23,12 +23,12 @@ from torch import nn
 from RNN.RNN import RNN_classifier
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
-
+from Embedding.Emb_CNN import CNNEncoder
 
 def __main__():
 
     dataset = ShrecDataset()
-    train_data, train_target, test_data, test_target = dataset.build()
+    train_data, train_target, test_data, test_target = dataset.build(one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
 
     device = "cpu"
@@ -68,11 +68,12 @@ def __main__():
         ref_im_ix = batch[-1]
         batch = batch[:-1]
         ref_im, ref_label = train_data[ref_im_ix], train_target[ref_im_ix]
-
+        ref_im = ref_im.reshape([1] + list(ref_im.shape))
+        ref_embedding = relNet.embedder(ref_im.float())
         
-        output = relNet(train_data[batch], ref_im)
-        y = torch.Tensor(ref_label == train_target[batch], dtype=torch.float32)
-        loss = relNet.loss(output, y)
+        output = relNet(train_data[batch].float(), ref_embedding.float())
+        y = ref_label == train_target[batch]
+        loss = relNet.loss(output.float(), y.float())
         relNet.zero_grad()
         loss.backward()
         optimizer.step()
