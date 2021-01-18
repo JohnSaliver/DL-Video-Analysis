@@ -1,9 +1,0 @@
-{
-    "jupyter.jupyterServerType": "local",
-    "python.pythonPath": "C:\\Users\\Mario\\anaconda3\\python.exe",
-    "code-runner.executorMap": {
-        "python": "$pythonPath -u $fullFileName",
-    },
-    "code-runner.clearPreviousOutput": true,
-    "code-runner.showExecutionMessage": false
-}
