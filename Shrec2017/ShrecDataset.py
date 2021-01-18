@@ -65,5 +65,3 @@ class ShrecDataset:
         test_target = Target[ind_test]
 
         return train_data, train_target, test_data, test_target
-
-dat = ShrecDataset()
