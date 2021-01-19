@@ -10,14 +10,14 @@ import torch
 import torch.nn as nn
 
 
-class CNNEncoder(nn.Module):
+class Emb_CNN(nn.Module):
     """docstring for ClassName"""
     def __init__(   self,
                     input_shape,    # = (timesteps, input_shape)
                     dim_concat = None,     # int (0, 1, 2) or None
                     TimeDistributed = False):   # True or False
                     
-        super(CNNEncoder, self).__init__()
+        super(Emb_CNN, self).__init__()
 
         self.input_reshape = list(input_shape[1:len(input_shape)])
         self.dim_concat = dim_concat
@@ -51,6 +51,8 @@ class CNNEncoder(nn.Module):
 
     def forward(self,x):
         x_reshape = x.contiguous().view((-1,) + (self.input_reshape))
+        print('x_reshape : ')
+        print(x_reshape.shape)
         y = self.layer1(x_reshape)
         y = self.layer2(y)
         y = self.layer3(y)
@@ -61,5 +63,5 @@ class CNNEncoder(nn.Module):
         return y
 
 from torchsummary import summary
-model = CNNEncoder((100, 3, 50, 50), dim_concat=2, TimeDistributed = False)
+model = Emb_CNN((100, 3, 50, 50), dim_concat=2, TimeDistributed = False)
 summary(model.cuda(),(100, 3, 50, 50))
