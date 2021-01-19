@@ -17,13 +17,28 @@ from scipy.ndimage.filters import convolve
 
 from sklearn.cluster import KMeans
 import torch
-from torch import nn
+from torch import FloatTensor, nn
 
 #Subfiles imports
 from RNN.RNN import RNN_classifier
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
 from Embedding.Emb_CNN import CNNEncoder
+def _getSampleAndQuery(Indices, batchSize):
+    try: 
+        inds=np.copy(Indices)
+        train_indices_indices = np.arange(len(inds))
+        Qix = np.random.choice(train_indices_indices, batchSize, replace=False)
+        Query_indices = inds[Qix]
+        inds = np.delete(inds, Qix)
+        train_indices_indices = np.arange(len(inds))
+        Six = np.random.choice(train_indices_indices, batchSize, replace=False)
+        Sample_indices = inds[Six]
+        inds = np.delete(inds, Six)
+
+        return Query_indices, Sample_indices, inds
+    except ValueError:
+        return None, None, None
 
 def __main__():
 
@@ -63,16 +78,23 @@ def __main__():
     bar.update(0)
     train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
-        train_indices_indices = np.arange(len(train_indices))
-        Qix = np.random.choice(train_indices_indices, batchSize)
-        Query_indices = train_indices[Qix]
-        train_indices = np.delete(train_indices, Qix)
-        Six = np.random.choice(train_indices_indices, batchSize)
-        Sample_indices = train_indices[Six]
-        train_indices = np.delete(train_indices, Six)
-        
-        while len(batch)==batchSize:
-            # How to do this is now the issue
+        batch_nb = 1
+        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize)
+        while Query_ixs is not None:
+            print(train_data[Sample_ixs].shape)
+            Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs])
+            Query_set = (train_data[Query_ixs], train_target[Query_ixs])
+            batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
+            
+            print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
+            batch_nb+=1
+            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize)
+
+if __name__ == "__main__":
+    __main__()
+
+
+""" Naive training
             batch = np.random.choice(dataset.trainSize, batchSize)
             ref_im_ix = batch[-1]
             batch = batch[:-1]
@@ -86,8 +108,5 @@ def __main__():
             relNet.zero_grad()
             loss.backward()
             optimizer.step()
-            print(f"epoch {epoch}, reference {ref_label.item()}, loss {loss.item()}")
-
-        
-if __name__ == "__main__":
-    __main__()
+            print(f"epoch {epoch}, reference {ref_label.item()}, loss {loss.item()}")"""
+    

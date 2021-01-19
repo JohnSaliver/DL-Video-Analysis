@@ -25,12 +25,12 @@ class RelationalNetwork(nn.Module):
         return self.simi(emb)
         
     def trainSQ(self, sample, query, optim):
-        # Sample : [(im, lab), ...]
-        # Query : [(im, lab), ...]
+        # Sample : ([im, ...], [lab, ...])
+        # Query : ([im, ...], [lab, ...])
 
         # if the problem is K-shot learning then we gotta aggregate the embedding of the K samples
         emb_support = {} #label to embedded representative
-        for im, lb in sample:
+        for im, lb in zip(sample[0], sample[1]):
             if lb in emb_support.keys():
                 emb_support[lb] += [self.embedder([im])]
             else:
@@ -39,23 +39,21 @@ class RelationalNetwork(nn.Module):
             emb_support[lb] = torch.sum(emb_support[lb], dim=0)/len(emb_support[lb])
 
         self.train()
-        losses = []
-        for qIm, y in query:
-            similarities = torch.zeros(len(emb_support.keys()))
-            targets = torch.zeros(len(emb_support.keys()))
-            self.zero_grad()
+        similarities = torch.zeros((query.shape[0], len(emb_support.keys())))
+        targets = torch.zeros((query.shape[0], len(emb_support.keys())))
+        self.zero_grad()
+        for qix, (qIm, y) in enumerate(zip(query[0], query[1])):
             
             for ix, lb in enumerate(emb_support.keys()):
-                similarities[ix] = self.forward(qIm, emb_support[lb])
-                targets[ix] = torch.float(lb==y)
+                similarities[qix][ix] = self.forward(qIm, emb_support[lb])
+                targets[qix][ix] = torch.float(lb==y)
 
-            loss = nn.functional.mse_loss(similarities, targets)
-            loss.backward()
+        loss = nn.functional.mse_loss(similarities, targets)
+        loss.backward()
 
-            optim.step()
-
-            losses.append(loss.item())
-        return np.mean(losses)
+        optim.step()
+        
+        return loss.item()
 
     def testST(self, support, test):
         # Support : [(im, lab), ...]
