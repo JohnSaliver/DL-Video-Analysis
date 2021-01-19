@@ -16,12 +16,14 @@ class RelationalNetwork(nn.Module):
                 nn.Linear(64, 1), nn.Sigmoid()
         )
         self.loss = nn.BCELoss()
+
     def forward(self, inp, support):
         emb = self.embedder(inp)
         support = support.expand((inp.shape[0], -1))
         emb = torch.cat([support, emb], 1)
         emb = emb.reshape(inp.shape[0], 2*self.embedding_size)
         return self.simi(emb)
+        
     def trainSQ(self, sample, query, optim):
         # Sample : [(im, lab), ...]
         # Query : [(im, lab), ...]

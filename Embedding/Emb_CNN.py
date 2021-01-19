@@ -15,7 +15,8 @@ class Emb_CNN(nn.Module):
     def __init__(   self,
                     input_shape,    # = (timesteps, input_shape)
                     dim_concat = None,     # int (0, 1, 2) or None
-                    TimeDistributed = False):   # True or False
+                    TimeDistributed = False, # True or False
+                    device="cuda"):  
                     
         super(Emb_CNN, self).__init__()
 
@@ -48,11 +49,11 @@ class Emb_CNN(nn.Module):
                         nn.Conv2d(64, 64, kernel_size=3, padding=1),
                         nn.BatchNorm2d(64, momentum=1, affine=True),
                         nn.ReLU())
+        
+        self.to(device)
 
     def forward(self,x):
         x_reshape = x.contiguous().view((-1,) + (self.input_reshape))
-        print('x_reshape : ')
-        print(x_reshape.shape)
         y = self.layer1(x_reshape)
         y = self.layer2(y)
         y = self.layer3(y)

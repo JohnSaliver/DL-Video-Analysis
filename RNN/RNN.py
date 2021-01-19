@@ -18,7 +18,6 @@ class RNN_classifier(nn.Module):
         self.outputSize = outputSize
         self.loss = nn.BCELoss()
 
-
         self.R = nn.Linear(self.H_Size, self.R_Size)
         self.Q = nn.Linear(self.inputSize + self.R_Size, self.Q_Size)
         self.O = nn.Linear(self.H_Size, self.O_Size)

@@ -5,7 +5,6 @@ Similaire au papier d'origine
 On suppose que l'embedding est réalisé sans TimeDistributed et donc avec dim_choice =/= None
 """
 
-
 import torch
 from torch import nn
 import numpy as np
@@ -13,7 +12,7 @@ import torch.nn.functional as F
 
 
 class Rel_CNN(nn.Module):
-    def __init__(self, input_shape):
+    def __init__(self, input_shape, device="cuda"):
         super(Rel_CNN, self).__init__()
 
         depth = 2 * input_shape[0]
@@ -32,8 +31,9 @@ class Rel_CNN(nn.Module):
                         nn.MaxPool2d(2))
 
         self.fc1 = nn.Linear(flatten_size, 64)
-
         self.fc2 = nn.Linear(64, 1)
+
+        self.to(device)
 
     def forward(self, x_1, x_2):
         x = torch.cat([x_1, x_2], 1)
@@ -41,7 +41,7 @@ class Rel_CNN(nn.Module):
         out = self.layer2(out)
         out = out.view(out.size(0), -1)
         out = F.relu(self.fc1(out))
-        out = F.sigmoid(self.fc2(out))
+        out = torch.sigmoid(self.fc2(out))
         return out
 
 from torchsummary import summary
