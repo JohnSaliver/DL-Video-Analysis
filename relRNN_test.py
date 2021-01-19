@@ -61,24 +61,32 @@ def __main__():
     bar = progressbar.ProgressBar(maxval=epochs)
     bar.start()
     bar.update(0)
-
+    train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
-
-        # How to do this is now the issue
-        batch = np.random.choice(dataset.trainSize, batchSize)
-        ref_im_ix = batch[-1]
-        batch = batch[:-1]
-        ref_im, ref_label = train_data[ref_im_ix], train_target[ref_im_ix]
-        ref_im = ref_im.reshape([1] + list(ref_im.shape))
-        ref_embedding = relNet.embedder(ref_im.float())
+        train_indices_indices = np.arange(len(train_indices))
+        Qix = np.random.choice(train_indices_indices, batchSize)
+        Query_indices = train_indices[Qix]
+        train_indices = np.delete(train_indices, Qix)
+        Six = np.random.choice(train_indices_indices, batchSize)
+        Sample_indices = train_indices[Six]
+        train_indices = np.delete(train_indices, Six)
         
-        output = relNet(train_data[batch].float(), ref_embedding.float())
-        y = ref_label == train_target[batch]
-        loss = relNet.loss(output.float(), y.float())
-        relNet.zero_grad()
-        loss.backward()
-        optimizer.step()
-        print(f"epoch {epoch}, reference {ref_label.item()}, loss {loss.item()}")
+        while len(batch)==batchSize:
+            # How to do this is now the issue
+            batch = np.random.choice(dataset.trainSize, batchSize)
+            ref_im_ix = batch[-1]
+            batch = batch[:-1]
+            ref_im, ref_label = train_data[ref_im_ix], train_target[ref_im_ix]
+            ref_im = ref_im.reshape([1] + list(ref_im.shape))
+            ref_embedding = relNet.embedder(ref_im.float())
+            
+            output = relNet(train_data[batch].float(), ref_embedding.float())
+            y = ref_label == train_target[batch]
+            loss = relNet.loss(output.float(), y.float())
+            relNet.zero_grad()
+            loss.backward()
+            optimizer.step()
+            print(f"epoch {epoch}, reference {ref_label.item()}, loss {loss.item()}")
 
         
 if __name__ == "__main__":
