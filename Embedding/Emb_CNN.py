@@ -62,7 +62,7 @@ class Emb_CNN(nn.Module):
         if self.TimeDistributed:
             y = y.contiguous().view(x.size(0), -1, y.size(-1))
         return y
-
+"""
 from torchsummary import summary
 model = Emb_CNN((100, 3, 50, 50), dim_concat=2, TimeDistributed = False)
-summary(model.cuda(),(100, 3, 50, 50))
+summary(model.cuda(),(100, 3, 50, 50))"""

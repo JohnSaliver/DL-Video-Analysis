@@ -23,8 +23,8 @@ from torch import FloatTensor, nn
 from RNN.RNN import RNN_classifier
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
-from Embedding.Emb_CNN import CNNEncoder
-def _getSampleAndQuery(Indices, batchSize):
+from Embedding.Emb_CNN import Emb_CNN
+def _getSampleAndQuery(Indices, batchSize, K):
     try: 
         inds=np.copy(Indices)
         train_indices_indices = np.arange(len(inds))
@@ -32,7 +32,7 @@ def _getSampleAndQuery(Indices, batchSize):
         Query_indices = inds[Qix]
         inds = np.delete(inds, Qix)
         train_indices_indices = np.arange(len(inds))
-        Six = np.random.choice(train_indices_indices, batchSize, replace=False)
+        Six = np.random.choice(train_indices_indices, K, replace=False)
         Sample_indices = inds[Six]
         inds = np.delete(inds, Six)
 
@@ -64,6 +64,7 @@ def __main__():
 
     adresse = './RNN/checkpoints'
 
+    K = 1 #K-shot learning
     batchSize = 100
     learningRate = 0.0001 
     epochs = 100
@@ -79,16 +80,15 @@ def __main__():
     train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
         batch_nb = 1
-        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize)
+        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
         while Query_ixs is not None:
-            print(train_data[Sample_ixs].shape)
             Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs])
             Query_set = (train_data[Query_ixs], train_target[Query_ixs])
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
-            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize)
+            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
 
 if __name__ == "__main__":
     __main__()
