@@ -40,7 +40,6 @@ class CNNEncoder(nn.Module):
     def __init__(   self,
                     input_shape,    # = (timesteps, input_shape)
                     dim_concat = None,     # int (0, 1, 2) or None
-                    device="cpu",
                     TimeDistributed = False):   # True or False
                     
         super(CNNEncoder, self).__init__()
