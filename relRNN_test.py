@@ -63,6 +63,7 @@ def __main__():
     bar.update(0)
 
     for epoch in range(epochs):
+
         # How to do this is now the issue
         batch = np.random.choice(dataset.trainSize, batchSize)
         ref_im_ix = batch[-1]
@@ -77,7 +78,7 @@ def __main__():
         relNet.zero_grad()
         loss.backward()
         optimizer.step()
-        print(f"epoch {epoch}, reference {ref_label}, loss {loss.item()}")
+        print(f"epoch {epoch}, reference {ref_label.item()}, loss {loss.item()}")
 
         
 if __name__ == "__main__":
