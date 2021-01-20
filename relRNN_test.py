@@ -66,9 +66,9 @@ def __main__():
     adresse = './RNN/checkpoints'
 
     K = 1 #K-shot learning
-    batchSize = 100
+    batchSize = 512
     learningRate = 0.0001 
-    epochs = 100
+    epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
 
     affichage = 5
