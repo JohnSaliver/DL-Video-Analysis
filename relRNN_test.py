@@ -69,7 +69,7 @@ def __main__():
     batchSize = 100
     learningRate = 0.0001 
     epochs = 100
-    optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate).to(device)
+    optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
 
     affichage = 5
     moyennage = 10
