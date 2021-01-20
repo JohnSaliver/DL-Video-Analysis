@@ -75,9 +75,11 @@ def __main__():
     moyennage = 10
     saving = 10
 
+    """
     bar = progressbar.ProgressBar(maxval=epochs)
     bar.start()
     bar.update(0)
+    """
     train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
         batch_nb = 1
@@ -90,6 +92,7 @@ def __main__():
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+        train_indices = np.arange(dataset.trainSize)
 if __name__ == "__main__":
     __main__()
 
