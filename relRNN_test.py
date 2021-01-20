@@ -90,10 +90,6 @@ def __main__():
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of 98900cb... Dataset_image added
 if __name__ == "__main__":
     __main__()
 
