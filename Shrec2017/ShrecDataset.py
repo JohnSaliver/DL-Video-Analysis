@@ -9,10 +9,11 @@ print(os.listdir('./Shrec2017/'))
 class ShrecDataset:
     def __init__(self):
         if  not('HandGestureDataset_SHREC2017_temp' in os.listdir('./Shrec2017/')):
+            print("Dataset not unziped, unziping...")
             with ZipFile('./Shrec2017/HandGestureDataset_SHREC2017_temp.zip', 'r') as zipObj:
                 zipObj.extractall('./Shrec2017/')
                 zipObj.close()
-
+            print("Finished unzipping...")
         self.root_datase = './Shrec2017/HandGestureDataset_SHREC2017_temp'
 
         self.dataSize, self.seqSize, self.inputSize, self.outputSize, self.trainSize = (0,0,0,0,0) #Gets set in build
