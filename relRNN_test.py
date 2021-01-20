@@ -1,6 +1,4 @@
 #Package imports
-!pip install patoolib
-
 import cv2
 import math
 import sklearn
