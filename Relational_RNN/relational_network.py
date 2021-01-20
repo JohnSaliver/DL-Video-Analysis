@@ -16,6 +16,7 @@ class RelationalNetwork(nn.Module):
                 nn.Linear(64, 1), nn.Sigmoid()
         )
         self.loss = nn.BCELoss()
+        self.device = device
         self.to(device)
     def forward(self, inp, support):
         emb = self.embedder(inp)
@@ -37,14 +38,14 @@ class RelationalNetwork(nn.Module):
             else:
                 emb_support[lb] = [im]
 
-        sample_embeddings = torch.zeros((len(emb_support.keys()), sample[0].shape[0], self.embedding_size))
+        sample_embeddings = torch.zeros((len(emb_support.keys()), sample[0].shape[0], self.embedding_size), device=self.device)
         for lb in emb_support.keys(): #compute the embeddings of the K samples
             for ix, im in enumerate(emb_support[lb]):
                 sample_embeddings[ix] = self.embedder(im.reshape([1]+list(im.shape)).float())
         sample_embeddings = torch.sum(sample_embeddings, dim=1)/sample[0].shape[0]
         self.train()
-        similarities = torch.zeros((len(emb_support.keys()), query[0].shape[0]))
-        targets = torch.zeros((len(emb_support.keys()), query[0].shape[0]))
+        similarities = torch.zeros((len(emb_support.keys()), query[0].shape[0]), device=self.device)
+        targets = torch.zeros((len(emb_support.keys()), query[0].shape[0]), device=self.device)
         self.zero_grad()
         for ix, lb in enumerate(emb_support.keys()):
             lb_simi = self.forward(query[0].float(), sample_embeddings[ix].reshape([1]+list(sample_embeddings[ix].shape)).float())
