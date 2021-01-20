@@ -3,7 +3,7 @@ from torch import nn
 import numpy as np
 
 class RelationalNetwork(nn.Module):
-    def __init__(self, embedder, embedding_size):
+    def __init__(self, embedder, embedding_size, device='cpu'):
         super().__init__()
         self.embedder = embedder
         self.embedding_size = embedding_size
@@ -16,7 +16,7 @@ class RelationalNetwork(nn.Module):
                 nn.Linear(64, 1), nn.Sigmoid()
         )
         self.loss = nn.BCELoss()
-
+        self.to(device)
     def forward(self, inp, support):
         emb = self.embedder(inp)
         support = support.expand((inp.shape[0], -1))

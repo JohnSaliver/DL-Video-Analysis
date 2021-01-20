@@ -56,7 +56,7 @@ def __main__():
 
     embedding_size = 512
     embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
-    relNet = RelationalNetwork(embedder, embedding_size)
+    relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []
     outputs = []
@@ -69,7 +69,7 @@ def __main__():
     batchSize = 100
     learningRate = 0.0001 
     epochs = 100
-    optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
+    optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate).to(device)
 
     affichage = 5
     moyennage = 10
@@ -83,8 +83,8 @@ def __main__():
         batch_nb = 1
         Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
         while Query_ixs is not None:
-            Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs])
-            Query_set = (train_data[Query_ixs], train_target[Query_ixs])
+            Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs]).to(device)
+            Query_set = (train_data[Query_ixs], train_target[Query_ixs]).to(device)
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
