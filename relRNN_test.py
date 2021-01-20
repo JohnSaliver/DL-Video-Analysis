@@ -83,8 +83,8 @@ def __main__():
         batch_nb = 1
         Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
         while Query_ixs is not None:
-            Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs]).to(device)
-            Query_set = (train_data[Query_ixs], train_target[Query_ixs]).to(device)
+            Sample_set = (train_data[Sample_ixs].to(device), train_target[Sample_ixs].to(device))
+            Query_set = (train_data[Query_ixs].to(device), train_target[Query_ixs].to(device))
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
