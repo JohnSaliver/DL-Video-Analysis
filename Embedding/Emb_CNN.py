@@ -13,14 +13,14 @@ import torch.nn as nn
 class Emb_CNN(nn.Module):
     """docstring for ClassName"""
     def __init__(   self,
-                    input_shape,    # = (timesteps, input_shape)
-                    dim_concat = None,     # int (0, 1, 2) or None
+                    input_shape,    # = (timesteps : unused if dim_concat=None, image_shape : depth, width, lenght)
+                    dim_concat = None,     # int (0, 1, 2) for image_shape
                     TimeDistributed = False, # True or False
-                    device="cuda"):  
+                    device="cuda"):
                     
         super(Emb_CNN, self).__init__()
 
-        self.input_reshape = list(input_shape[1:len(input_shape)])
+        self.input_reshape = list(input_shape[1:])
         self.dim_concat = dim_concat
         if dim_concat != None:
             self.input_reshape[dim_concat] = self.input_reshape[dim_concat]*input_shape[0]
@@ -33,7 +33,7 @@ class Emb_CNN(nn.Module):
                         nn.BatchNorm2d(64, momentum=1, affine=True),
                         nn.ReLU(),
                         nn.MaxPool2d(2))
-                        
+
         self.layer2 = nn.Sequential(
                         nn.Conv2d(64, 64, kernel_size=3, padding=0),
                         nn.BatchNorm2d(64, momentum=1, affine=True),
@@ -62,7 +62,7 @@ class Emb_CNN(nn.Module):
         if self.TimeDistributed:
             y = y.contiguous().view(x.size(0), -1, y.size(-1))
         return y
-"""
+
 from torchsummary import summary
-model = Emb_CNN((100, 3, 50, 50), dim_concat=2, TimeDistributed = False)
-summary(model.cuda(),(100, 3, 50, 50))"""
+model = Emb_CNN((-1, 3, 50, 50), dim_concat=None, TimeDistributed = True)
+summary(model.cuda(),(100, 3, 50, 50))
