@@ -144,3 +144,5 @@ dmypy.json
 cython_debug/
 .vscode
 settings.json
+Shrec2017/HandGestureDataset_SHREC2017/*
+Shrec2017/HandGestureDataset_SHREC2017.rar
