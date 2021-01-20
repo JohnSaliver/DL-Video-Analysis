@@ -25,7 +25,6 @@ from RNN.RNN import RNN_classifier
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
 from Embedding.Emb_CNN import Emb_CNN
-
 def _getSampleAndQuery(Indices, batchSize, K):
     try: 
         inds=np.copy(Indices)
@@ -47,7 +46,6 @@ def __main__():
     dataset = ShrecDataset()
     train_data, train_target, test_data, test_target = dataset.build(one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
-    print(train_data.shape, train_target.shape)
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -67,7 +65,7 @@ def __main__():
 
     adresse = './RNN/checkpoints'
 
-    K = 1 # K-shot learning
+    K = 1 #K-shot learning
     batchSize = 100
     learningRate = 0.0001 
     epochs = 100
@@ -92,6 +90,10 @@ def __main__():
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of 98900cb... Dataset_image added
 if __name__ == "__main__":
     __main__()
 
