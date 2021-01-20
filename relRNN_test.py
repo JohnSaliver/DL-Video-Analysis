@@ -1,4 +1,6 @@
 #Package imports
+!pip install patoolib
+
 import cv2
 import math
 import sklearn
@@ -18,6 +20,7 @@ from scipy.ndimage.filters import convolve
 from sklearn.cluster import KMeans
 import torch
 from torch import FloatTensor, nn
+
 
 #Subfiles imports
 from RNN.RNN import RNN_classifier
@@ -75,7 +78,7 @@ def __main__():
     affichage = 5
     moyennage = 10
     saving = 10
-"""
+
     bar = progressbar.ProgressBar(maxval=epochs)
     bar.start()
     bar.update(0)
@@ -91,7 +94,6 @@ def __main__():
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
-"""
 if __name__ == "__main__":
     __main__()
 
