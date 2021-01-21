@@ -63,8 +63,8 @@ class RelationalNetwork(nn.Module):
 
     def _getSampleEmbeddings(self, emb_support, K):
         sample_embeddings = torch.zeros((len(emb_support.keys()), K, self.embedding_size), device=self.device)
-        for lb in emb_support.keys(): #compute the embeddings of the K samples
-            for ix, im in enumerate(emb_support[lb]):
+        for ix, lb in enumerate(emb_support.keys()): #compute the embeddings of the K samples
+            for im in emb_support[lb]:
                 sample_embeddings[ix] = self.embedder(im.reshape([1]+list(im.shape)).float())
         sample_embeddings = torch.sum(sample_embeddings, dim=1)/K
         return sample_embeddings
