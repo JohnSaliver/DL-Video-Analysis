@@ -3,9 +3,8 @@ from zipfile import ZipFile
 import os
 from os.path import isfile, join
 import numpy as np
-import patoolib
-from PIL import Image
 
+print(os.listdir('./Shrec2017/'))
 
 class ShrecDataset:
     def __init__(self, full=False):
@@ -50,10 +49,12 @@ class ShrecDataset:
             return np.loadtxt(path + 'skeletons_image.txt')
 
 
+
     def build(self):
         ## Build the data pointer and the ground truth
         self.Ground_truth = []
         self.Data_pointer = []
+
         for idx_gesture in range(14):
             for idx_subject in range(28):
                 for idx_finger in range(2):
@@ -108,3 +109,4 @@ database = ShrecDataset(full=True)
 train_data, train_target, test_data, test_target = database.get_data(0.9, True)
 print(train_data.shape, train_target.shape, test_data.shape, test_target.shape)
 """
+

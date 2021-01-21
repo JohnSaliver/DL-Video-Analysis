@@ -12,7 +12,7 @@ import numpy as np
 import torch.nn.functional as F
 
 class Simple_RNN(nn.Module):
-    def __init__(self, inputSize, outputSize, device="cuda"):
+    def __init__(self, inputSize, outputSize, device="cpu"):
         super().__init__()
         
         self.f = nn.Tanh().to(device) # Hyperparameter 

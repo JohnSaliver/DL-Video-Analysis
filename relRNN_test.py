@@ -25,6 +25,7 @@ from RNN.RNN import RNN_classifier
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
 from Embedding.Emb_CNN import Emb_CNN
+
 from Relational_RNN.Rel_CNN import Rel_CNN
 from Relational_RNN.Rel_RNN import Rel_RNN
 from model_CNN import Video_Analysis_Network
@@ -50,7 +51,9 @@ def __main__():
     dataset = ShrecDataset(full=True)
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
+
     print(train_data.shape, train_target.shape, test_data.shape, test_target.shape)
+
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -60,9 +63,14 @@ def __main__():
         print("Using cpu")
 
     embedding_size = 512
-    embedder = Emb_CNN((-1, 1) + dataset.inputSize, dim_concat=None, TimeDistributed = True, device=device)
-    relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
-    model = Video_Analysis_Network(embedder, relNet)
+
+    #embedder = Emb_CNN((-1, 1) + dataset.inputSize, dim_concat=None, TimeDistributed = True, device=device)
+    #relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
+    #model = Video_Analysis_Network(embedder, relNet)
+
+    embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
+    relNet = RelationalNetwork(embedder, embedding_size, device=device)
+
     lossHistory = []
     outputs = []
     target = []
@@ -70,32 +78,39 @@ def __main__():
 
     adresse = './RNN/checkpoints'
 
-    K = 1 # K-shot learning
-    batchSize = 100
+    K = 1 #K-shot learning
+    batchSize = 512
     learningRate = 0.0001 
-    epochs = 100
+    epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
 
     affichage = 5
     moyennage = 10
     saving = 10
 
+    """
     bar = progressbar.ProgressBar(maxval=epochs)
     bar.start()
     bar.update(0)
+    """
     train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
         batch_nb = 1
         Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
         while Query_ixs is not None:
-            Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs])
-            Query_set = (train_data[Query_ixs], train_target[Query_ixs])
 
-            batch_loss = model.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer, database=dataset)
+           
+            Sample_set = (train_data[Sample_ixs].to(device), train_target[Sample_ixs].to(device))
+            Query_set = (train_data[Query_ixs].to(device), train_target[Query_ixs].to(device))
+            batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
+
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+
+
+        train_indices = np.arange(dataset.trainSize)
 
 if __name__ == "__main__":
     __main__()

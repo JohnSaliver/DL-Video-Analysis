@@ -1,0 +1,10 @@
+index, timestamp, power.draw [W], clocks.current.sm [MHz], clocks.current.memory [MHz], clocks.current.graphics [MHz], memory.used [MiB]
+0, 2021/01/20 21:19:32.030, 7.35 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:33.033, 7.32 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:34.036, 6.91 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:35.039, 7.89 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:36.042, 7.59 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:37.046, 7.75 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:38.049, 8.62 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:39.052, 7.79 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
+0, 2021/01/20 21:19:40.055, 7.81 W, 300 MHz, 405 MHz, 300 MHz, 1 MiB
