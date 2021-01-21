@@ -18,6 +18,7 @@ class RelationalNetwork(nn.Module):
         self.loss = nn.BCELoss()
         self.device = device
         self.to(device)
+        
     def forward(self, inp, support):
         emb = self.embedder(inp)
         support = support.expand((inp.shape[0], -1))

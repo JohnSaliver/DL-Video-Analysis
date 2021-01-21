@@ -3,8 +3,9 @@ from zipfile import ZipFile
 import os
 from os.path import isfile, join
 import numpy as np
+import patoolib
+from PIL import Image
 
-print(os.listdir('./Shrec2017/'))
 
 class ShrecDataset:
     def __init__(self, full=False):

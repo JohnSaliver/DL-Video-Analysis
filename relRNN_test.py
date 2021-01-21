@@ -18,6 +18,7 @@ from scipy.ndimage.filters import convolve
 from sklearn.cluster import KMeans
 import torch
 from torch import FloatTensor, nn
+import gc
 
 
 #Subfiles imports
@@ -41,19 +42,24 @@ def _getSampleAndQuery(Indices, batchSize, K):
         Six = np.random.choice(train_indices_indices, K, replace=False)
         Sample_indices = inds[Six]
         inds = np.delete(inds, Six)
-
         return Query_indices, Sample_indices, inds
     except ValueError:
         return None, None, None
+
+def check_memory():
+    t = torch.cuda.get_device_properties(0).total_memory
+    r = torch.cuda.memory_reserved(0) 
+    a = torch.cuda.memory_allocated(0)
+    f = r-a  # free inside reserved
+    print(t,r,a,f)
+
 
 def __main__():
 
     dataset = ShrecDataset(full=True)
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
-
     print(train_data.shape, train_target.shape, test_data.shape, test_target.shape)
-
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -64,12 +70,12 @@ def __main__():
 
     embedding_size = 512
 
-    #embedder = Emb_CNN((-1, 1) + dataset.inputSize, dim_concat=None, TimeDistributed = True, device=device)
-    #relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
-    #model = Video_Analysis_Network(embedder, relNet)
+    embedder = Emb_CNN((-1,) + dataset.inputSize, dim_concat=None, TimeDistributed = True, device=device)
+    relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
+    model = Video_Analysis_Network(embedder, relNet, dataset=dataset, device=device)
 
-    embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
-    relNet = RelationalNetwork(embedder, embedding_size, device=device)
+    # embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
+    # relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []
     outputs = []
@@ -78,7 +84,7 @@ def __main__():
 
     adresse = './RNN/checkpoints'
 
-    K = 1 #K-shot learning
+    K = 2 # K-shot learning
     batchSize = 512
     learningRate = 0.0001 
     epochs = 5
@@ -87,7 +93,7 @@ def __main__():
     affichage = 5
     moyennage = 10
     saving = 10
-
+    
     """
     bar = progressbar.ProgressBar(maxval=epochs)
     bar.start()
@@ -95,26 +101,29 @@ def __main__():
     """
     train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
+        check_memory()
+        gc.collect()
+        torch.cuda.empty_cache()
+        check_memory()
         batch_nb = 1
         Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+        print('training begin', Query_ixs.shape, Sample_ixs.shape, train_indices.shape)
         while Query_ixs is not None:
 
-           
-            Sample_set = (train_data[Sample_ixs].to(device), train_target[Sample_ixs].to(device))
-            Query_set = (train_data[Query_ixs].to(device), train_target[Query_ixs].to(device))
-            batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
-
+            Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs])
+            Query_set = (train_data[Query_ixs], train_target[Query_ixs])
+            check_memory()
+            print('the real deal')
+            batch_loss = model.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
 
-
         train_indices = np.arange(dataset.trainSize)
 
 if __name__ == "__main__":
     __main__()
-
 
 """ Naive training
             batch = np.random.choice(dataset.trainSize, batchSize)
