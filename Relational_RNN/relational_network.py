@@ -30,6 +30,28 @@ class RelationalNetwork(nn.Module):
         # Query : ([im, ...], [lab, ...])
 
         # if the problem is K-shot learning then we gotta aggregate the embedding of the K samples
+        N = query[0].shape[0]
+        emb_support = self._getDict(sample) # dictionary pointing from labels to sample datapoint 
+        sample_embeddings = self._getSampleEmbeddings(emb_support,  K=sample[0].shape[0]) # compute embedding from samples and aggregate them if K>1
+        
+        similarities = torch.zeros((len(emb_support.keys()), N), device=self.device)
+        targets = torch.zeros((len(emb_support.keys()), N), device=self.device)
+
+        # compute predicted similarity and label for each class of the sample set
+        self.train()
+        self.zero_grad()
+        for ix, lb in enumerate(emb_support.keys()):
+            lb_simi = self.forward(query[0].float(), sample_embeddings[ix].reshape([1]+list(sample_embeddings[ix].shape)).float())
+            similarities[ix] = lb_simi.reshape([N])
+            targets[ix] = (lb==query[1]).float().reshape([N])
+        # compute the loss and perform optimization step
+        loss = nn.functional.mse_loss(similarities, targets)
+        loss.backward()
+        optim.step()
+        return loss.item()
+    
+    def _getDict(self, sample):
+        # Sample : ([im, ...], [lab, ...])
         emb_support = {}
         for im, lb in zip(sample[0], sample[1]):
             lb = lb.item()
@@ -37,28 +59,42 @@ class RelationalNetwork(nn.Module):
                 emb_support[lb] += [im]
             else:
                 emb_support[lb] = [im]
+        return emb_support
 
-        sample_embeddings = torch.zeros((len(emb_support.keys()), sample[0].shape[0], self.embedding_size), device=self.device)
+    def _getSampleEmbeddings(self, emb_support, K):
+        sample_embeddings = torch.zeros((len(emb_support.keys()), K, self.embedding_size), device=self.device)
         for lb in emb_support.keys(): #compute the embeddings of the K samples
             for ix, im in enumerate(emb_support[lb]):
                 sample_embeddings[ix] = self.embedder(im.reshape([1]+list(im.shape)).float())
-        sample_embeddings = torch.sum(sample_embeddings, dim=1)/sample[0].shape[0]
+        sample_embeddings = torch.sum(sample_embeddings, dim=1)/K
+        return sample_embeddings
+    
+    def evalSQ(self, sample, query):
+        # Sample : ([im, ...], [lab, ...])
+        # Query : ([im, ...], [lab, ...])
+        print("sample ", sample[0].shape, "query ", query[0].shape)
+        # if the problem is K-shot learning then we gotta aggregate the embedding of the K samples
+        N = query[0].shape[0]
+        emb_support = self._getDict(sample) # dictionary pointing from labels to sample datapoint 
+        sample_embeddings = self._getSampleEmbeddings(emb_support,  K=sample[0].shape[0]) # compute embedding from samples and aggregate them if K>1
+        
+        similarities = torch.zeros((len(emb_support.keys()), N), device=self.device)
+        targets = torch.zeros((len(emb_support.keys()), N), device=self.device)
+
+        # compute predicted similarity and label for each class of the sample set
         self.train()
-        similarities = torch.zeros((len(emb_support.keys()), query[0].shape[0]), device=self.device)
-        targets = torch.zeros((len(emb_support.keys()), query[0].shape[0]), device=self.device)
         self.zero_grad()
         for ix, lb in enumerate(emb_support.keys()):
             lb_simi = self.forward(query[0].float(), sample_embeddings[ix].reshape([1]+list(sample_embeddings[ix].shape)).float())
-            similarities[ix] = lb_simi.reshape([query[0].shape[0]])
-            targets[ix] = (lb==query[1]).float().reshape([query[0].shape[0]])
-
+            similarities[ix] = lb_simi.reshape([N])
+            targets[ix] = (lb==query[1]).float().reshape([N])
+        # compute the loss and perform optimization step
         loss = nn.functional.mse_loss(similarities, targets)
-        loss.backward()
-
-        optim.step()
-        
+        print(f"similarities {similarities}")
+        predictions = np.argmax(similarities, axis=0)
+        print(f"predictions {predictions}")
         return loss.item()
-
+        
     def testST(self, support, test):
         # Support : [(im, lab), ...]
         # Test : [im, ...]
