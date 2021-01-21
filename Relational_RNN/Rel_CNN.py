@@ -43,7 +43,8 @@ class Rel_CNN(nn.Module):
         out = F.relu(self.fc1(out))
         out = torch.sigmoid(self.fc2(out))
         return out
-
+"""
 from torchsummary import summary
 model = Rel_CNN((64, 11, 11))
 summary(model.cuda(), [(64, 11, 11), (64, 11, 11)])
+"""

@@ -25,6 +25,9 @@ from RNN.RNN import RNN_classifier
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
 from Embedding.Emb_CNN import Emb_CNN
+from Relational_RNN.Rel_CNN import Rel_CNN
+from Relational_RNN.Rel_RNN import Rel_RNN
+from model_CNN import Video_Analysis_Network
 
 def _getSampleAndQuery(Indices, batchSize, K):
     try: 
@@ -44,10 +47,10 @@ def _getSampleAndQuery(Indices, batchSize, K):
 
 def __main__():
 
-    dataset = ShrecDataset()
-    train_data, train_target, test_data, test_target = dataset.build(one_hot=False)
+    dataset = ShrecDataset(full=True)
+    train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
-    print(train_data.shape, train_target.shape)
+    print(train_data.shape, train_target.shape, test_data.shape, test_target.shape)
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -57,9 +60,9 @@ def __main__():
         print("Using cpu")
 
     embedding_size = 512
-    embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
-    relNet = RelationalNetwork(embedder, embedding_size)
-
+    embedder = Emb_CNN((-1, 1) + dataset.inputSize, dim_concat=None, TimeDistributed = True, device=device)
+    relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
+    model = Video_Analysis_Network(embedder, relNet)
     lossHistory = []
     outputs = []
     target = []
@@ -87,11 +90,13 @@ def __main__():
         while Query_ixs is not None:
             Sample_set = (train_data[Sample_ixs], train_target[Sample_ixs])
             Query_set = (train_data[Query_ixs], train_target[Query_ixs])
-            batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
+
+            batch_loss = model.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer, database=dataset)
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+
 if __name__ == "__main__":
     __main__()
 
@@ -111,4 +116,3 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
             print(f"epoch {epoch}, reference {ref_label.item()}, loss {loss.item()}")"""
-    

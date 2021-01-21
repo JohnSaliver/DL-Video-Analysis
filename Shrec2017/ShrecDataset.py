@@ -31,7 +31,7 @@ class ShrecDataset:
         self.seqSize = 171 # self.get_seqSize()
 
 
-    def open_data(self, path, video=False):
+    def open_data(self, path, video=True, add_depth=True):
         if video :
             out = []
             exist = True
@@ -43,6 +43,8 @@ class ShrecDataset:
                     t += 1
                 else:
                     exist = False
+            if add_depth:
+                out = np.expand_dims(out, axis=1)
             return np.array(out)
         else:
             return np.loadtxt(path + 'skeletons_image.txt')
@@ -68,7 +70,7 @@ class ShrecDataset:
     def get_seqSize(self):
         max_size = 0
         for pointer in self.Data_pointer:
-            size = len(self.open_data(pointer))
+            size = len(self.open_data(pointer, video=False))
             if max_size < size:
                 max_size = size
         return(max_size)

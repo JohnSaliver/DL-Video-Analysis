@@ -87,7 +87,8 @@ class Rel_RNN(nn.Module):
         out = F.relu(self.fc1(out[:, -1, :]))
         out = torch.sigmoid(self.fc2(out))
         return out
-
+"""
 from torchsummary import summary
 model = Rel_RNN((64, 11, 11))
 summary(model.cuda(), [(100, 64, 11, 11), (100, 64, 11, 11)])
+"""
