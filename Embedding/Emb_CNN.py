@@ -13,10 +13,10 @@ import torch.nn as nn
 class Emb_CNN(nn.Module):
     """docstring for ClassName"""
     def __init__(   self,
-                    input_shape,    # = (timesteps, input_shape)
-                    dim_concat = None,     # int (0, 1, 2) or None
-                    TimeDistributed = False, # True or False
-                    device="cuda"):  
+                    input_shape,                # = (timesteps : unused if dim_concat=None, image_shape : depth, width, lenght)
+                    dim_concat = None,          # int (0, 1, 2) for image_shape
+                    TimeDistributed = False,    # True or False
+                    device="cuda"):
                     
         super(Emb_CNN, self).__init__()
 
@@ -24,7 +24,7 @@ class Emb_CNN(nn.Module):
         self.dim_concat = dim_concat
         if dim_concat != None:
             self.input_reshape[dim_concat] = self.input_reshape[dim_concat]*input_shape[0]
-        self.input_reshape=tuple(self.input_reshape)
+        self.input_reshape = tuple(self.input_reshape)
         
         self.TimeDistributed = TimeDistributed
 
