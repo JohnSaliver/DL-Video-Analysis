@@ -64,7 +64,8 @@ def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
 
 def __main__():
 
-    dataset = ShrecDataset(full=True)
+
+    dataset = ShrecDataset(full=True, rescale=(60, 50))
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
 
@@ -83,7 +84,7 @@ def __main__():
     #embedder = Emb_CNN((-1, 1) + dataset.inputSize, dim_concat=None, TimeDistributed = True, device=device)
     #relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
     #model = Video_Analysis_Network(embedder, relNet)
-
+    print(f"in {dataset.inputSize}")
     embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
@@ -96,7 +97,7 @@ def __main__():
 
     K = 1 #K-shot learning
     C = [2, 3, 4]
-    batchSize = 512
+    batchSize = 16
     learningRate = 0.0001 
     epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
@@ -116,10 +117,10 @@ def __main__():
         batch_nb = 1
         Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_indices, batchSize=batchSize, K=K, C=C)
         while Query_ixs is not None:
-
+            print(train_data)
            
-            Sample_set = (train_data[Sample_ixs].to(device), train_target[Sample_ixs].to(device))
-            Query_set = (train_data[Query_ixs].to(device), train_target[Query_ixs].to(device))
+            Sample_set = (dataset.open_datas(train_data[Sample_ixs]).to(device), train_target[Sample_ixs])
+            Query_set = (dataset.open_datas(train_data[Query_ixs]).to(device), train_target[Query_ixs])
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
 
             

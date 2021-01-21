@@ -3,11 +3,12 @@ from zipfile import ZipFile
 import os
 from os.path import isfile, join
 import numpy as np
-
+from PIL import Image
+import patoolib
+import cv2
 print(os.listdir('./Shrec2017/'))
-
 class ShrecDataset:
-    def __init__(self, full=False):
+    def __init__(self, full=False, rescale=None):
         if full :
             self.root_datase = './Shrec2017/HandGestureDataset_SHREC2017'
             if  not('HandGestureDataset_SHREC2017' in os.listdir('./Shrec2017/')):
@@ -23,11 +24,12 @@ class ShrecDataset:
                     zipObj.extractall('./Shrec2017/')
                     zipObj.close()
                 print("Finished unzipping...")
-
+        self.rescale = rescale
         self.build() # Build the Data_pointer and the Ground_truth
         self.dataSize = len(self.Data_pointer)
         self.inputSize = self.open_data(self.Data_pointer[0], video=True).shape[1:]
         self.seqSize = 171 # self.get_seqSize()
+        
 
 
     def open_data(self, path, video=True, add_depth=True):
@@ -38,7 +40,10 @@ class ShrecDataset:
             while exist:
                 path_image = path + '{0}_depth.png'.format(t)
                 if os.path.exists(path_image):
-                    out.append(np.array(Image.open(path_image)))
+                    I= np.array(cv2.imread(path_image, 0))
+                    if self.rescale is not None:
+                        I = np.array(cv2.resize(I, self.rescale, interpolation = cv2.INTER_AREA))
+                    out.append(I)
                     t += 1
                 else:
                     exist = False
@@ -48,7 +53,13 @@ class ShrecDataset:
         else:
             return np.loadtxt(path + 'skeletons_image.txt')
 
-
+    def open_datas(self, paths, video=True, add_depth=True):
+        ims = []
+        for path in paths:
+            vid = self.open_data(path)
+            ims.append(np.pad(vid, [(0, 171-len(vid)), (0, 0), (0, 0), (0, 0)]))  
+        print(np.array(ims).shape)
+        return torch.Tensor(np.array(ims))
 
     def build(self):
         ## Build the data pointer and the ground truth
@@ -100,6 +111,7 @@ class ShrecDataset:
         test_data = self.Data_pointer[ind_test]
         test_target = Target[ind_test]
 
+        
         return train_data, train_target, test_data, test_target
  
 
