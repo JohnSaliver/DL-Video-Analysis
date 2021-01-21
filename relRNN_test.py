@@ -30,21 +30,37 @@ from Relational_RNN.Rel_CNN import Rel_CNN
 from Relational_RNN.Rel_RNN import Rel_RNN
 from model_CNN import Video_Analysis_Network
 
-def _getSampleAndQuery(Indices, batchSize, K):
-    try: 
-        inds=np.copy(Indices)
-        train_indices_indices = np.arange(len(inds))
-        Qix = np.random.choice(train_indices_indices, batchSize, replace=False)
-        Query_indices = inds[Qix]
-        inds = np.delete(inds, Qix)
-        train_indices_indices = np.arange(len(inds))
-        Six = np.random.choice(train_indices_indices, K, replace=False)
-        Sample_indices = inds[Six]
-        inds = np.delete(inds, Six)
+def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
+    
+    inds = np.zeros_like(Classes)
+    inds[Indices] = True
+    inds = np.where(np.isin(Classes, C) and inds, np.arange(len(Classes)), False)
+    inds = inds[inds != False]
+    inds = np.random.shuffle(inds)
 
-        return Query_indices, Sample_indices, inds
-    except ValueError:
+    Sample = []
+    inds_bis = []
+    per_classe = {}
+    for classe in C:
+        per_classe[classe] = 0
+
+    for i in inds:
+        if per_classe[Classes[i]]<K:
+            Sample.append(i)
+            per_classe[Classes[i]] += 1
+        else:
+            inds_bis.append(i)
+
+    if len(inds_bis) < batchSize:
         return None, None, None
+
+    for classe in C:
+        if per_classe[classe] != K:
+            return None, None, None
+    
+    inds = np.random.shuffle(inds_bis)
+    return Sample, inds[:batchSize], inds[batchSize:]
+
 
 def __main__():
 
@@ -79,6 +95,7 @@ def __main__():
     adresse = './RNN/checkpoints'
 
     K = 1 #K-shot learning
+    C = [2, 3, 4]
     batchSize = 512
     learningRate = 0.0001 
     epochs = 5
@@ -94,9 +111,10 @@ def __main__():
     bar.update(0)
     """
     train_indices = np.arange(dataset.trainSize)
+    
     for epoch in range(epochs):
         batch_nb = 1
-        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_indices, batchSize=batchSize, K=K, C=C)
         while Query_ixs is not None:
 
            
@@ -107,7 +125,7 @@ def __main__():
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
-            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
+            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_indices, batchSize=batchSize, K=K, C=C)
 
 
         train_indices = np.arange(dataset.trainSize)
