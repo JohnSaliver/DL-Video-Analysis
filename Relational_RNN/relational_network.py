@@ -39,7 +39,7 @@ class RelationalNetwork(nn.Module):
 
         # compute predicted similarity and label for each class of the sample set
         self.train()
-        self.zero_grad()
+        optim.zero_grad()
         for ix, lb in enumerate(emb_support.keys()):
             lb_simi = self.forward(query[0].float(), sample_embeddings[ix].reshape([1]+list(sample_embeddings[ix].shape)).float())
             similarities[ix] = lb_simi.reshape([N])
