@@ -65,6 +65,7 @@ class RNN_commeavant(nn.Module):
         self.O_Size = 100 # Hyperparameter
         self.seqSize = seqSize
         self.outputSize = outputSize
+        self.inputSize = inputSize[0]
         self.loss = nn.BCELoss()
         
         self.R = nn.Linear(self.H_Size, self.R_Size)

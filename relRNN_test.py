@@ -82,7 +82,7 @@ def __main__():
     """
     embedder = RNN_classifier(dataset.rescale, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)"""
-    embedder = RNN_commeavant(dataset.rescale, dataset.seqSize, embedding_size, device=device)
+    embedder = RNN_commeavant(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []

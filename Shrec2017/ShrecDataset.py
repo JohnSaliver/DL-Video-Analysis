@@ -9,7 +9,7 @@ import cv2
 print('Ca commence')
 # print(os.listdir('./Shrec2017/'))
 class ShrecDataset:
-    def __init__(self, full=False, rescale=None):
+    def __init__(self, full=False, rescale=None, video=False):
         if full :
             self.root_datase = './Shrec2017/HandGestureDataset_SHREC2017'
             if  not('HandGestureDataset_SHREC2017' in os.listdir('./Shrec2017/')):
@@ -28,7 +28,7 @@ class ShrecDataset:
         self.rescale = rescale
         self.build() # Build the Data_pointer and the Ground_truth
         self.dataSize = len(self.Data_pointer)
-        self.inputSize = self.open_data(self.Data_pointer[0], video=True).shape[1:]
+        self.inputSize = self.open_data(self.Data_pointer[0], video=video).shape[1:]
         self.seqSize = 171 # self.get_seqSize()
         
 
@@ -65,8 +65,10 @@ class ShrecDataset:
         else :
             skel = []
             for path in paths:
-                skel.append(self.open_data)
-            return skel
+                skel = self.open_data(path)
+                print(skel.shape)
+                skel.append(np.pad(self.open_data, [()]))
+            return torch.Tensor(np.array(skel))
 
     def build(self):
         ## Build the data pointer and the ground truth
