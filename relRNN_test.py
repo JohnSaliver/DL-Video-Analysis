@@ -93,8 +93,10 @@ def __main__():
     adresse = './RNN/checkpoints'
 
     K = 1 #K-shot learning
-    C = [2, 3, 4]
+    C_train = [2, 3, 4]
+    C_eval = [5, 6]
     batchSize = 16
+    evalSize = 16
     learningRate = 0.0005 
     epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
@@ -108,14 +110,19 @@ def __main__():
     bar.start()
     bar.update(0)
     """
-    train_indices = np.where(np.isin(train_target, C), np.reshape(np.arange(dataset.trainSize), train_target.shape) , False)
+    train_indices = np.where(np.isin(train_target, C_train), np.reshape(np.arange(dataset.trainSize), train_target.shape) , False)
     train_indices = np.array(train_indices[train_indices != [False]])
     np.random.shuffle(np.array(train_indices))
+    
+    eval_indices = np.where(np.isin(train_target, C_eval), np.reshape(np.arange(dataset.trainSize), train_target.shape) , False)
+    eval_indices = np.array(eval_indices[eval_indices != [False]])
+    np.random.shuffle(np.array(eval_indices))
+
     HIST = {'tloss': [], 'tacc':[], 'eacc': []}
     for epoch in range(epochs):
         batch_nb = 1
-        Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
-        eval_sampl, eval_query, eval_indexes = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=16, K=K, C=[5, 6])
+        Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C_train)
+        eval_sampl, eval_query, eval_indexes = _getSampleAndQuery(eval_indices, Classes=train_target, batchSize=evalSize, K=K, C=C_eval)
 
         while Query_ixs is not None:
             Sample_set = (dataset.open_datas(train_data[Sample_ixs], video=video).to(device), train_target[Sample_ixs])
@@ -130,10 +137,11 @@ def __main__():
             HIST['tacc'].append(in_accuracy)
             HIST['eacc'].append(out_accuracy)
             batch_nb+=1
-            Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C)
+            Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C_train)
             with open(f"{K}_shot_{len(C)}_way_{batchSize}b.pickle") as f:
                 pickle.dump(HIST, f, protocol=pickle.pickle.HIGHEST_PROTOCOL)
         np.random.shuffle(np.array(train_indices))
+        np.random.shuffle(np.array(eval_indices))
 
 if __name__ == "__main__":
     __main__()
