@@ -18,7 +18,7 @@ class RNN_classifier(nn.Module):
         self.seqSize = seqSize
         self.outputSize = outputSize
         self.loss = nn.BCELoss()
-        self.emb_size = 750
+        self.emb_size = 195
         
         self.image_embedding = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=3, padding=1), 

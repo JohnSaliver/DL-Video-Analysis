@@ -29,6 +29,7 @@ from Embedding.Emb_CNN import Emb_CNN
 from Relational_RNN.Rel_CNN import Rel_CNN
 from Relational_RNN.Rel_RNN import Rel_RNN
 from model_CNN import Video_Analysis_Network
+import pickle
 
 def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
     Sample = []
@@ -106,20 +107,30 @@ def __main__():
     train_indices = np.where(np.isin(train_target, C), np.reshape(np.arange(dataset.trainSize), train_target.shape) , False)
     train_indices = np.array(train_indices[train_indices != [False]])
     np.random.shuffle(np.array(train_indices))
-
+    HIST = {'tloss': [], 'tacc':[], 'eacc': []}
     for epoch in range(epochs):
         batch_nb = 1
         Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
+        eval_sampl, eval_query, eval_indexes = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=16, K=K, C=[5, 6])
+
         while Query_ixs is not None:
             Sample_set = (dataset.open_datas(train_data[Sample_ixs]).to(device), train_target[Sample_ixs])
             Query_set = (dataset.open_datas(train_data[Query_ixs]).to(device), train_target[Query_ixs])
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
-            relNet.evalSQ(sample=Sample_set, query=Query_set)
-            print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
+            in_accuracy = relNet.evalSQ(sample=Sample_set, query=Query_set)
+            evalSampleSet = (dataset.open_datas(train_data[eval_sampl]).to(device), train_target[eval_sampl])
+            evalQuerySet = (dataset.open_datas(train_data[eval_query]).to(device), train_target[eval_query])
+            out_accuracy = relNet.evalSQ(sample=evalSampleSet, query=evalQuerySet)
+            print(f"epoch {epoch}, batch nb {batch_nb}, trian loss {batch_loss}, in-distrib acc {in_accuracy}, out-distrib acc {out_accuracy}")
+            HIST['tloss'].append(batch_loss)
+            HIST['tacc'].append(in_accuracy)
+            HIST['eacc'].append(out_accuracy)
             batch_nb+=1
             Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C)
-
+            with open(f"{K}_shot_{len(C)}_way_{batchSize}b.pickle") as f:
+                pickle.dump(HIST, f, protocol=pickle.pickle.HIGHEST_PROTOCOL)
         np.random.shuffle(np.array(train_indices))
+
 if __name__ == "__main__":
     __main__()
 
