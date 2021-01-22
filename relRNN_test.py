@@ -70,7 +70,7 @@ def __main__():
     adresse = './RNN/checkpoints'
 
     K = 1 #K-shot learning
-    batchSize = 2048
+    batchSize = 512
     learningRate = 0.0001 
     epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
@@ -85,20 +85,20 @@ def __main__():
     bar.update(0)
     """
     t_3 = time()
-    print(f"time 2: {t_3-t_0}, from last {t_3-t_2}")
+    print(f"time 3: {t_3-t_0}, from last {t_3-t_2}")
     train_indices = np.arange(dataset.trainSize)
     for epoch in range(epochs):
         batch_nb = 1
         Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
         while Query_ixs is not None:
             t_4 = time()
-            print(f"time 2: {t_4-t_0}, from last {t_4-t_3}")
+            print(f"time 4: {t_4-t_0}, from last {t_4-t_3}")
             Sample_set = (train_data[Sample_ixs].to(device), train_target[Sample_ixs].to(device))
             Query_set = (train_data[Query_ixs].to(device), train_target[Query_ixs].to(device))
             
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
             t_5 = time()
-            print(f"time 2: {t_5-t_0}, from last {t_5-t_4}")
+            print(f"time 5: {t_5-t_0}, from last {t_5-t_4}")
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
             Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, batchSize=batchSize, K=K)
