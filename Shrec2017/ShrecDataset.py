@@ -55,7 +55,7 @@ class ShrecDataset:
             return np.loadtxt(path + 'skeletons_image.txt')
 
     def open_datas(self, paths, video=True, add_depth=True):
-        if video = True:
+        if video == True:
             ims = []
             for path in paths:
                 vid = self.open_data(path)
