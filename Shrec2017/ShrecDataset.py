@@ -55,12 +55,18 @@ class ShrecDataset:
             return np.loadtxt(path + 'skeletons_image.txt')
 
     def open_datas(self, paths, video=True, add_depth=True):
-        ims = []
-        for path in paths:
-            vid = self.open_data(path)
-            ims.append(np.pad(vid, [(0, 171-len(vid)), (0, 0), (0, 0), (0, 0)], mode='constant'))  
-        # print(np.array(ims).shape)
-        return torch.Tensor(np.array(ims))
+        if video = True:
+            ims = []
+            for path in paths:
+                vid = self.open_data(path)
+                ims.append(np.pad(vid, [(0, 171-len(vid)), (0, 0), (0, 0), (0, 0)], mode='constant'))  
+            # print(np.array(ims).shape)
+            return torch.Tensor(np.array(ims))
+        else :
+            skel = []
+            for path in paths:
+                skel.append(self.open_data)
+            return skel
 
     def build(self):
         ## Build the data pointer and the ground truth

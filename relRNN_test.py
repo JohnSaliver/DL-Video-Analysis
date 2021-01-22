@@ -22,6 +22,7 @@ from torch import FloatTensor, nn
 
 #Subfiles imports
 from RNN.RNN import RNN_classifier
+from RNN.RNN import RNN_commeavant
 from Shrec2017.ShrecDataset import ShrecDataset
 from Relational_RNN.relational_network import RelationalNetwork
 from Embedding.Emb_CNN import Emb_CNN
@@ -57,8 +58,8 @@ def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
 
 
 def __main__():
-
-    dataset = ShrecDataset(full=True, rescale=(30, 25))
+    video = False
+    dataset = ShrecDataset(full=False, rescale=(30, 25), video=video)
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
 
@@ -78,7 +79,10 @@ def __main__():
     #relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
     #model = Video_Analysis_Network(embedder, relNet)
     print(f"in {dataset.inputSize}")
+    """
     embedder = RNN_classifier(dataset.rescale, dataset.seqSize, embedding_size, device=device)
+    relNet = RelationalNetwork(embedder, embedding_size, device=device)"""
+    embedder = RNN_commeavant(dataset.rescale, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []
@@ -114,12 +118,12 @@ def __main__():
         eval_sampl, eval_query, eval_indexes = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=16, K=K, C=[5, 6])
 
         while Query_ixs is not None:
-            Sample_set = (dataset.open_datas(train_data[Sample_ixs]).to(device), train_target[Sample_ixs])
-            Query_set = (dataset.open_datas(train_data[Query_ixs]).to(device), train_target[Query_ixs])
+            Sample_set = (dataset.open_datas(train_data[Sample_ixs], video=video).to(device), train_target[Sample_ixs])
+            Query_set = (dataset.open_datas(train_data[Query_ixs], video=video).to(device), train_target[Query_ixs])
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
             in_accuracy = relNet.evalSQ(sample=Sample_set, query=Query_set)
-            evalSampleSet = (dataset.open_datas(train_data[eval_sampl]).to(device), train_target[eval_sampl])
-            evalQuerySet = (dataset.open_datas(train_data[eval_query]).to(device), train_target[eval_query])
+            evalSampleSet = (dataset.open_datas(train_data[eval_sampl], video=video).to(device), train_target[eval_sampl])
+            evalQuerySet = (dataset.open_datas(train_data[eval_query], video=video).to(device), train_target[eval_query])
             out_accuracy = relNet.evalSQ(sample=evalSampleSet, query=evalQuerySet)
             print(f"epoch {epoch}, batch nb {batch_nb}, trian loss {batch_loss}, in-distrib acc {in_accuracy}, out-distrib acc {out_accuracy}")
             HIST['tloss'].append(batch_loss)
