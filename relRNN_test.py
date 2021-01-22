@@ -109,7 +109,7 @@ def __main__():
 
     for epoch in range(epochs):
         batch_nb = 1
-        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
+        Query_ixs, Sample_ixs, train_indices_batch = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
         while Query_ixs is not None:
             Sample_set = (dataset.open_datas(train_data[Sample_ixs]).to(device), train_target[Sample_ixs])
             Query_set = (dataset.open_datas(train_data[Query_ixs]).to(device), train_target[Query_ixs])
@@ -117,10 +117,8 @@ def __main__():
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
-            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
-
-        train_indices = np.arange(dataset.trainSize)
-
+            Query_ixs, Sample_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C)
+        np.random.shuffle(np.array(train_indices))
 if __name__ == "__main__":
     __main__()
 
