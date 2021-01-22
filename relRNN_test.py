@@ -31,23 +31,16 @@ from Relational_RNN.Rel_RNN import Rel_RNN
 from model_CNN import Video_Analysis_Network
 
 def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
-    
-    inds = np.zeros_like(Classes)
-    inds[Indices] = True
-    inds = np.where(np.isin(Classes, C) and inds, np.arange(len(Classes)), False)
-    inds = inds[inds != False]
-    inds = np.random.shuffle(inds)
-
     Sample = []
     inds_bis = []
     per_classe = {}
     for classe in C:
         per_classe[classe] = 0
 
-    for i in inds:
-        if per_classe[Classes[i]]<K:
+    for i in Indices:
+        if per_classe[Classes[i, 0]]<K:
             Sample.append(i)
-            per_classe[Classes[i]] += 1
+            per_classe[Classes[i, 0]] += 1
         else:
             inds_bis.append(i)
 
@@ -58,12 +51,11 @@ def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
         if per_classe[classe] != K:
             return None, None, None
     
-    inds = np.random.shuffle(inds_bis)
-    return Sample, inds[:batchSize], inds[batchSize:]
+    np.random.shuffle(inds_bis)
+    return Sample, inds_bis[:batchSize], inds_bis[batchSize:]
 
 
 def __main__():
-
 
     dataset = ShrecDataset(full=True, rescale=(60, 50))
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
@@ -111,23 +103,21 @@ def __main__():
     bar.start()
     bar.update(0)
     """
-    train_indices = np.arange(dataset.trainSize)
-    
+    train_indices = np.where(np.isin(train_target, C), np.reshape(np.arange(dataset.trainSize), train_target.shape) , False)
+    train_indices = np.array(train_indices[train_indices != [False]])
+    np.random.shuffle(np.array(train_indices))
+
     for epoch in range(epochs):
         batch_nb = 1
-        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_indices, batchSize=batchSize, K=K, C=C)
+        Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
         while Query_ixs is not None:
-            print(train_data)
-           
             Sample_set = (dataset.open_datas(train_data[Sample_ixs]).to(device), train_target[Sample_ixs])
             Query_set = (dataset.open_datas(train_data[Query_ixs]).to(device), train_target[Query_ixs])
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
-
             
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
-            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_indices, batchSize=batchSize, K=K, C=C)
-
+            Query_ixs, Sample_ixs, train_indices = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
 
         train_indices = np.arange(dataset.trainSize)
 
