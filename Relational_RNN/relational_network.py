@@ -43,7 +43,7 @@ class RelationalNetwork(nn.Module):
         for ix, lb in enumerate(emb_support.keys()):
             lb_simi = self.forward(query[0].float(), sample_embeddings[ix].reshape([1]+list(sample_embeddings[ix].shape)).float())
             similarities[ix] = lb_simi.reshape([N])
-            targets[ix] = (lb==query[1]).float().reshape([N])
+            targets[ix] = torch.Tensor(lb==query[1]).float().reshape([N])
         # compute the loss and perform optimization step
         loss = nn.functional.mse_loss(similarities, targets)
         loss.backward()
