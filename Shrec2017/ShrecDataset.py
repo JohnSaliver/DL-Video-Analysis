@@ -6,7 +6,8 @@ import numpy as np
 from PIL import Image
 import patoolib
 import cv2
-print(os.listdir('./Shrec2017/'))
+print('Ca commence')
+# print(os.listdir('./Shrec2017/'))
 class ShrecDataset:
     def __init__(self, full=False, rescale=None):
         if full :
@@ -58,7 +59,7 @@ class ShrecDataset:
         for path in paths:
             vid = self.open_data(path)
             ims.append(np.pad(vid, [(0, 171-len(vid)), (0, 0), (0, 0), (0, 0)], mode='constant'))  
-        print(np.array(ims).shape)
+        # print(np.array(ims).shape)
         return torch.Tensor(np.array(ims))
 
     def build(self):

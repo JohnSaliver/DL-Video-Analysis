@@ -57,7 +57,7 @@ def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
 
 def __main__():
 
-    dataset = ShrecDataset(full=True, rescale=(60, 50))
+    dataset = ShrecDataset(full=True, rescale=(30, 25))
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
 
@@ -77,7 +77,7 @@ def __main__():
     #relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
     #model = Video_Analysis_Network(embedder, relNet)
     print(f"in {dataset.inputSize}")
-    embedder = RNN_classifier(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
+    embedder = RNN_classifier(dataset.rescale, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []

@@ -10,7 +10,6 @@ class RNN_classifier(nn.Module):
         self.f = nn.Tanh().to(device) # Hyperparameter 
         self.f_out = nn.Softmax(dim = 1).to(device) # nn.Sigmoid() # Hyperparameter 
         self.device = device
-        self.inputSize = inputSize
         self.R_Size = 100 # Hyperparameter
         self.Q_Size = 100 # Hyperparameter
         self.A = [0, 0.25, 0.5, 0.95] # Hyperparameter
@@ -19,7 +18,8 @@ class RNN_classifier(nn.Module):
         self.seqSize = seqSize
         self.outputSize = outputSize
         self.loss = nn.BCELoss()
-        self.emb_size = 168
+        self.emb_size = 4*np.prod(((np.array(inputSize)-1)//4 + 1)//2)
+        3333
         
         self.image_embedding = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=3, padding=1), 
