@@ -57,7 +57,7 @@ class ShrecDataset:
         ims = []
         for path in paths:
             vid = self.open_data(path)
-            ims.append(np.pad(vid, [(0, 171-len(vid)), (0, 0), (0, 0), (0, 0)]))  
+            ims.append(np.pad(vid, [(0, 171-len(vid)), (0, 0), (0, 0), (0, 0)], mode='constant'))  
         print(np.array(ims).shape)
         return torch.Tensor(np.array(ims))
 
