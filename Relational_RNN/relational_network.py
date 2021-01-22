@@ -92,8 +92,8 @@ class RelationalNetwork(nn.Module):
         
         loss = nn.functional.mse_loss(similarities, targets)
         print(similarities)
-        similarities = np.argmax(similarities.detach().numpy(), axis=0)
-        targets = np.argmax(targets.detach().numpy(), axis=0)
+        similarities = np.argmax(similarities.cpu().detach().numpy(), axis=0)
+        targets = np.argmax(targets.cpu().detach().numpy(), axis=0)
         accuracy = np.sum(similarities == targets)/len(similarities)
         print(similarities, targets, similarities == targets, accuracy)
         return accuracy

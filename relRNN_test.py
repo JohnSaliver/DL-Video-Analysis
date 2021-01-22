@@ -58,13 +58,11 @@ def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
 
 
 def __main__():
-    video = False
-    dataset = ShrecDataset(full=False, rescale=(30, 25), video=video)
+    video = True
+    dataset = ShrecDataset(full=True, rescale=(30, 25), video=video)
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
-
     print(train_data.shape, train_target.shape, test_data.shape, test_target.shape)
-
 
     device = "cpu"
     if torch.cuda.is_available():
@@ -79,11 +77,11 @@ def __main__():
     #relNet = Rel_RNN((1,) + dataset.inputSize, device=device)
     #model = Video_Analysis_Network(embedder, relNet)
     print(f"in {dataset.inputSize}")
-    """
+    
     embedder = RNN_classifier(dataset.rescale, dataset.seqSize, embedding_size, device=device)
-    relNet = RelationalNetwork(embedder, embedding_size, device=device)"""
-    embedder = RNN_commeavant(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)
+    # embedder = RNN_commeavant(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
+    # relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []
     outputs = []
@@ -95,8 +93,8 @@ def __main__():
     K = 1 #K-shot learning
     C_train = [2, 3, 4]
     C_eval = [5, 6]
-    batchSize = 16
-    evalSize = 16
+    batchSize = 8
+    evalSize = 8
     learningRate = 0.0005 
     epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
@@ -138,8 +136,8 @@ def __main__():
             HIST['eacc'].append(out_accuracy)
             batch_nb+=1
             Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C_train)
-            with open(f"{K}_shot_{len(C)}_way_{batchSize}b.pickle") as f:
-                pickle.dump(HIST, f, protocol=pickle.pickle.HIGHEST_PROTOCOL)
+            with open(f"{K}_shot_{len(C_train)}_way_{batchSize}b.pickle", "wb+") as f:
+                pickle.dump(HIST, f)
         np.random.shuffle(np.array(train_indices))
         np.random.shuffle(np.array(eval_indices))
 
