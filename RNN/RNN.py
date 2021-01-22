@@ -19,15 +19,12 @@ class RNN_classifier(nn.Module):
         self.seqSize = seqSize
         self.outputSize = outputSize
         self.loss = nn.BCELoss()
-        self.emb_size = 168
+        self.emb_size = 750
         
         self.image_embedding = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=3, padding=1), 
             nn.LeakyReLU(),
-            nn.Conv2d(16, 8, kernel_size=3, stride=2,padding=1),
-            nn.LeakyReLU(),
-            nn.Conv2d(8, 4,kernel_size=3, stride=2,padding=1),
-            nn.MaxPool2d(2),
+            nn.Conv2d(16, 1, kernel_size=3, stride=2,padding=1),
             nn.LeakyReLU(),
             nn.Flatten()
         )

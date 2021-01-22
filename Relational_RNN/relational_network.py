@@ -72,9 +72,10 @@ class RelationalNetwork(nn.Module):
     def evalSQ(self, sample, query):
         # Sample : ([im, ...], [lab, ...])
         # Query : ([im, ...], [lab, ...])
-        print("sample ", sample[0].shape, "query ", query[0].shape)
+
         # if the problem is K-shot learning then we gotta aggregate the embedding of the K samples
         N = query[0].shape[0]
+        print(query[0].shape)
         emb_support = self._getDict(sample) # dictionary pointing from labels to sample datapoint 
         sample_embeddings = self._getSampleEmbeddings(emb_support,  K=sample[0].shape[0]) # compute embedding from samples and aggregate them if K>1
         
@@ -87,13 +88,15 @@ class RelationalNetwork(nn.Module):
         for ix, lb in enumerate(emb_support.keys()):
             lb_simi = self.forward(query[0].float(), sample_embeddings[ix].reshape([1]+list(sample_embeddings[ix].shape)).float())
             similarities[ix] = lb_simi.reshape([N])
-            targets[ix] = (lb==query[1]).float().reshape([N])
+            targets[ix] = torch.Tensor(lb==query[1]).float().reshape([N])
         # compute the loss and perform optimization step
         loss = nn.functional.mse_loss(similarities, targets)
-        print(f"similarities {similarities}")
-        predictions = np.argmax(similarities, axis=0)
-        print(f"predictions {predictions}")
-        return loss.item()
+        print(similarities)
+        similarities = np.argmax(similarities.detach().numpy(), axis=0)
+        targets = np.argmax(targets.detach().numpy(), axis=0)
+        accuracy = np.sum(similarities == targets)/len(similarities)
+        print(similarities, targets, similarities == targets, accuracy)
+        return accuracy
         
     def testST(self, support, test):
         # Support : [(im, lab), ...]

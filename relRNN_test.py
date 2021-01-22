@@ -90,7 +90,7 @@ def __main__():
     K = 1 #K-shot learning
     C = [2, 3, 4]
     batchSize = 16
-    learningRate = 0.0001 
+    learningRate = 0.0005 
     epochs = 5
     optimizer = torch.optim.Adam(relNet.parameters(), lr=learningRate)
 
@@ -109,15 +109,16 @@ def __main__():
 
     for epoch in range(epochs):
         batch_nb = 1
-        Query_ixs, Sample_ixs, train_indices_batch = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
+        Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices, Classes=train_target, batchSize=batchSize, K=K, C=C)
         while Query_ixs is not None:
             Sample_set = (dataset.open_datas(train_data[Sample_ixs]).to(device), train_target[Sample_ixs])
             Query_set = (dataset.open_datas(train_data[Query_ixs]).to(device), train_target[Query_ixs])
             batch_loss = relNet.trainSQ(sample=Sample_set, query=Query_set, optim=optimizer)
-            
+            relNet.evalSQ(sample=Sample_set, query=Query_set)
             print(f"epoch {epoch}, batch nb {batch_nb}, loss {batch_loss}")
             batch_nb+=1
-            Query_ixs, Sample_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C)
+            Sample_ixs, Query_ixs, train_indices_batch = _getSampleAndQuery(train_indices_batch, Classes=train_target, batchSize=batchSize, K=K, C=C)
+
         np.random.shuffle(np.array(train_indices))
 if __name__ == "__main__":
     __main__()
