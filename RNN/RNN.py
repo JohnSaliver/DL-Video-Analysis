@@ -10,7 +10,6 @@ class RNN_classifier(nn.Module):
         self.f = nn.Tanh().to(device) # Hyperparameter 
         self.f_out = nn.Softmax(dim = 1).to(device) # nn.Sigmoid() # Hyperparameter 
         self.device = device
-        self.inputSize = inputSize
         self.R_Size = 100 # Hyperparameter
         self.Q_Size = 100 # Hyperparameter
         self.A = [0, 0.25, 0.5, 0.95] # Hyperparameter
