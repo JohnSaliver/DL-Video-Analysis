@@ -1,6 +1,7 @@
 import torch
-from torch import dtype, nn
+from torch import dtype, max_pool2d, nn
 import numpy as np
+from torch.nn.modules.linear import Linear
 
 class RNN_classifier(nn.Module):
     def __init__(self, inputSize, seqSize, outputSize, device="cpu"):
@@ -18,9 +19,20 @@ class RNN_classifier(nn.Module):
         self.seqSize = seqSize
         self.outputSize = outputSize
         self.loss = nn.BCELoss()
-
+        self.emb_size = 168
+        
+        self.image_embedding = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=3, padding=1), 
+            nn.LeakyReLU(),
+            nn.Conv2d(16, 8, kernel_size=3, stride=2,padding=1),
+            nn.LeakyReLU(),
+            nn.Conv2d(8, 4,kernel_size=3, stride=2,padding=1),
+            nn.MaxPool2d(2),
+            nn.LeakyReLU(),
+            nn.Flatten()
+        )
         self.R = nn.Linear(self.H_Size, self.R_Size)
-        self.Q = nn.Linear(np.prod(self.inputSize) + self.R_Size, self.Q_Size)
+        self.Q = nn.Linear(self.emb_size + self.R_Size, self.Q_Size)
         self.O = nn.Linear(self.H_Size, self.O_Size)
         self.flat = nn.Flatten()
         self.Output = nn.Linear(self.O_Size * self.seqSize, self.outputSize)
@@ -35,8 +47,8 @@ class RNN_classifier(nn.Module):
         for t in range(self.seqSize):
             H = torch.reshape(Ha[:, t - 1].clone(), (batchSize, self.H_Size))
             Rt = self.f(self.R(H))
-            print("rnn shapes ", In.shape, " Rt ", Rt.shape)
-            Qt = self.f(self.Q(torch.cat((In[:, t], Rt), 1)))
+            im_embed = self.image_embedding(In[:, t])
+            Qt = self.f(self.Q(torch.cat((im_embed, Rt), 1)))
             for a, Alpha in enumerate(self.A) :
                 Ha[:, t, a] = Alpha * Ha[:, t - 1, a].clone() + (1 - Alpha) * Qt
             H = torch.reshape(Ha[:, t].clone(), (batchSize, self.H_Size))
