@@ -62,11 +62,3 @@ class Emb_CNN(nn.Module):
         if self.TimeDistributed:
             y = y.contiguous().view(x.size(0), -1, y.size(-1))
         return y
-"""
-from torchsummary import summary
-<<<<<<< HEAD
-model = Emb_CNN((-1, 3, 50, 50), dim_concat=None, TimeDistributed = True)
-=======
-model = Emb_CNN((100, 3, 50, 50), dim_concat=2, TimeDistributed = False)
->>>>>>> parent of 98900cb... Dataset_image added
-summary(model.cuda(),(100, 3, 50, 50))"""
