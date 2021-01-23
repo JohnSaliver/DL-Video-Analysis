@@ -2,6 +2,8 @@
 Projet repository for the 3rd year final project at ENSEA:
 Learning to Compare: Relation Network for Video Classification
 
+Adaptation of the Learning to compare paper for video, rather than image, classification. The paper can be found at https://arxiv.org/abs/1711.06025
+
 Authors
 Jeremy Gatineau and Mario Larsen
 
