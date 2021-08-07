@@ -12,12 +12,12 @@ from scipy import misc
 from scipy import ndimage
 from IPython import display
 from PIL import Image, ImageOps
-from IPython.display import YouTubeVideo
+from IPython.display import YouTubeVideo    
 from scipy.ndimage.filters import convolve
 
 from sklearn.cluster import KMeans
 import torch
-from torch import FloatTensor, nn
+from torch import FloatTensor, dtype, nn
 
 
 #Subfiles imports
@@ -59,11 +59,20 @@ def _getSampleAndQuery(Indices, Classes, batchSize, K, C):
 
 def __main__():
     video = True
-    dataset = ShrecDataset(full=True, rescale=(30, 25), video=video)
+    dataset = ShrecDataset(full=True, rescale=None, video=video)
     train_data, train_target, test_data, test_target = dataset.get_data(training_share=0.9, one_hot=False)
     print(dataset.dataSize, dataset.seqSize, dataset.inputSize, dataset.outputSize, dataset.trainSize)
     print(train_data.shape, train_target.shape, test_data.shape, test_target.shape)
-
+    import sys
+    sizes = []
+    for i in range(len(train_data)):
+        first = dataset.open_data(train_data[0])
+        
+        first = np.pad(first, [(0, 171-len(first)), (0, 0), (0, 0), (0, 0)])
+        print(first.shape)
+        print("size ", sys.getsizeof(np.float32(first)))
+        sizes.append(sys.getsizeof(np.float32(first)))
+    print("mean of ", np.mean(sizes))
     device = "cpu"
     if torch.cuda.is_available():
         device = "cuda"
@@ -81,7 +90,7 @@ def __main__():
     embedder = RNN_classifier(dataset.rescale, dataset.seqSize, embedding_size, device=device)
     relNet = RelationalNetwork(embedder, embedding_size, device=device)
     # embedder = RNN_commeavant(dataset.inputSize, dataset.seqSize, embedding_size, device=device)
-    # relNet = RelationalNetwork(embedder, embedding_size, device=device)
+    #relNet = RelationalNetwork(embedder, embedding_size, device=device)
 
     lossHistory = []
     outputs = []
